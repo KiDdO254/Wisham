@@ -1,0 +1,187 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Add Rental Unit - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8 dashboard-bg">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="text-3xl font-bold text-orange-900 mb-4">
+                Add New Rental Unit
+            </h2>
+            
+            <form method="post" class="text-left bg-white p-6 rounded-lg shadow border border-orange-200">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.property.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Property *
+                        </label>
+                        {{ form.property }}
+                        {% if form.property.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.property.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.unit_number.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Unit Number *
+                        </label>
+                        {{ form.unit_number }}
+                        {% if form.unit_number.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.unit_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.unit_type.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Unit Type *
+                        </label>
+                        {{ form.unit_type }}
+                        {% if form.unit_type.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.unit_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.rent_amount.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Monthly Rent (KES) *
+                        </label>
+                        {{ form.rent_amount }}
+                        {% if form.rent_amount.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.rent_amount.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.deposit_amount.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Security Deposit (KES) *
+                        </label>
+                        {{ form.deposit_amount }}
+                        {% if form.deposit_amount.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.deposit_amount.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.floor_number.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Floor Number
+                        </label>
+                        {{ form.floor_number }}
+                        {% if form.floor_number.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.floor_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.floor_area.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Floor Area (sq ft)
+                        </label>
+                        {{ form.floor_area }}
+                        {% if form.floor_area.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.floor_area.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <div class="flex items-center">
+                            {{ form.is_available }}
+                            <label for="{{ form.is_available.id_for_label }}" class="ml-2 block text-sm text-orange-700">
+                                Is Available
+                            </label>
+                        </div>
+                        {% if form.is_available.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.is_available.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <a href="{% url 'properties:property_list' %}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-orange">
+                        Add Rental Unit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateFloorChoices(propertyId) {
+    const floorNumberField = document.getElementById('{{ form.floor_number.id_for_label }}');
+    const propertySelect = document.getElementById('{{ form.property.id_for_label }}');
+    
+    if (!propertyId) {
+        floorNumberField.innerHTML = '<option value="">Select Property First</option>';
+        return;
+    }
+    
+    // Get the selected property option to check if it's commercial
+    const selectedOption = propertySelect.options[propertySelect.selectedIndex];
+    const propertyType = selectedOption.getAttribute('data-property-type');
+    
+    if (propertyType === 'commercial') {
+        // For commercial properties, we'll need to fetch floor data
+        // For now, we'll show a message to select floor
+        floorNumberField.innerHTML = '<option value="">Select Floor</option>';
+        floorNumberField.required = true;
+        
+        // Add commercial unit types
+        const unitTypeField = document.getElementById('{{ form.unit_type.id_for_label }}');
+        const commercialOptions = [
+            '<option value="office">Office</option>',
+            '<option value="shop">Shop</option>',
+            '<option value="warehouse">Warehouse</option>',
+            '<option value="industrial">Industrial Space</option>'
+        ];
+        
+        // Add commercial options to existing options
+        const existingOptions = unitTypeField.innerHTML;
+        if (!existingOptions.includes('office')) {
+            unitTypeField.innerHTML += commercialOptions.join('');
+        }
+    } else {
+        // For non-commercial properties
+        floorNumberField.innerHTML = '<option value="">Not Applicable</option>';
+        floorNumberField.required = false;
+        
+        // Remove commercial unit types for non-commercial properties
+        const unitTypeField = document.getElementById('{{ form.unit_type.id_for_label }}');
+        unitTypeField.innerHTML = unitTypeField.innerHTML
+            .replace(/<option value="office">Office<\/option>/g, '')
+            .replace(/<option value="shop">Shop<\/option>/g, '')
+            .replace(/<option value="warehouse">Warehouse<\/option>/g, '')
+            .replace(/<option value="industrial">Industrial Space<\/option>/g, '');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const propertySelect = document.getElementById('{{ form.property.id_for_label }}');
+    if (propertySelect.value) {
+        updateFloorChoices(propertySelect.value);
+    }
+});
+</script>
+{% endblock %}

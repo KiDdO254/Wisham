@@ -1,0 +1,80 @@
+{% extends 'users/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login - Wisham{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-orange-900">
+                Sign in to your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-orange-700">
+                Or
+                <a href="{% url 'users:register' %}" class="font-medium text-orange-600 hover:text-orange-500">
+                    create a new account
+                </a>
+            </p>
+        </div>
+        
+        <div class="bg-white py-8 px-6 shadow-lg rounded-lg border border-orange-200">
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-orange-800">
+                        Username
+                    </label>
+                    <div class="mt-1">
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-orange-800">
+                        Password
+                    </label>
+                    <div class="mt-1">
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember_me" name="remember_me" type="checkbox" class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-orange-300 rounded">
+                        <label for="remember_me" class="ml-2 block text-sm text-orange-700">
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-orange-600 hover:text-orange-500">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn btn-orange w-full">
+                        Sign in
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

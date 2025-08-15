@@ -1,0 +1,86 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Property Manager Dashboard - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8">
+        <h1 class="text-2xl font-bold text-orange-900 mb-2">Property Manager Dashboard</h1>
+        <p class="text-orange-700">Welcome to your property manager dashboard.</p>
+    </div>
+    
+    <!-- View Links Section -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-orange-900 mb-4">Quick Access</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Profile</h3>
+                <p class="text-orange-700 mb-4">Manage your personal information and preferences</p>
+                <div class="flex justify-center">
+                    <a href="{% url 'users:profile' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+                        View Profile →
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Properties</h3>
+                <p class="text-orange-700 mb-4">Browse available rental properties</p>
+                <div class="flex justify-center">
+                    <a href="{% url 'properties:property_list' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+                        View Properties →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Management Links Section -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-orange-900 mb-4">Property Management</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Tenant Management</h3>
+                <p class="text-orange-700 mb-4">Add and manage tenant accounts</p>
+                <div class="flex justify-center">
+                    <a href="{% url 'users:add_tenant' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+                        Add Tenant →
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Properties</h3>
+                <p class="text-orange-700 mb-4">Add new rental properties</p>
+                <div class="flex justify-center">
+                    <a href="{% url 'properties:add_property' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+                        Add Property →
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Rental Units</h3>
+                <p class="text-orange-700 mb-4">Add rental units to properties</p>
+                <div class="flex justify-center">
+                    <a href="{% url 'properties:add_rental_unit' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+                        Add Rental Unit →
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Amenities</h3>
+                <p class="text-orange-700 mb-4">Add property amenities</p>
+                <div class="flex justify-center">
+                    <a href="{% url 'properties:add_amenity' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+                        Add Amenity →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

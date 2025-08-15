@@ -1,0 +1,235 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Add Property - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8 dashboard-bg">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="text-3xl font-bold text-orange-900 mb-4">
+                Add New Property
+            </h2>
+            
+            <form method="post" class="text-left bg-white p-6 rounded-lg shadow border border-orange-200">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Property Name *
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.property_type.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Property Type *
+                        </label>
+                        {{ form.property_type }}
+                        {% if form.property_type.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.property_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.county.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            County *
+                        </label>
+                        {{ form.county }}
+                        {% if form.county.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.county.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.town.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Town *
+                        </label>
+                        {{ form.town }}
+                        {% if form.town.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.town.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Address *
+                        </label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Commercial Property Fields -->
+                    <div id="commercial-fields" class="md:col-span-2 hidden">
+                        <h3 class="text-lg font-medium text-orange-900 mb-3">Commercial Property Details</h3>
+                        <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ form.number_of_floors.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                                        Number of Floors *
+                                    </label>
+                                    {{ form.number_of_floors }}
+                                    {% if form.number_of_floors.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.number_of_floors.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="mt-1 text-xs text-orange-600">Required for commercial properties</p>
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.units_per_floor.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                                        Units per Floor *
+                                    </label>
+                                    {{ form.units_per_floor }}
+                                    {% if form.units_per_floor.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.units_per_floor.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="mt-1 text-xs text-orange-600">Required for commercial properties</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.contact_phone.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Contact Phone
+                        </label>
+                        {{ form.contact_phone }}
+                        {% if form.contact_phone.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.contact_phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.contact_email.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            Contact Email
+                        </label>
+                        {{ form.contact_email }}
+                        {% if form.contact_email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.contact_email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-orange-800 mb-1">
+                            Amenities
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {{ form.amenities }}
+                        </div>
+                        {% if form.amenities.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.amenities.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <div class="flex items-center">
+                            {{ form.is_active }}
+                            <label for="{{ form.is_active.id_for_label }}" class="ml-2 block text-sm text-orange-700">
+                                Is Active
+                            </label>
+                        </div>
+                        {% if form.is_active.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.is_active.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium text-orange-900 mb-3">Property Images</h3>
+                    <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                        <div class="mb-3">
+                            <label for="id_image" class="block text-sm font-medium text-orange-800 mb-1">
+                                Upload Image
+                            </label>
+                            {{ image_form.image }}
+                            {% if image_form.image.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ image_form.image.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_caption" class="block text-sm font-medium text-orange-800 mb-1">
+                                Caption
+                            </label>
+                            {{ image_form.caption }}
+                            {% if image_form.caption.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ image_form.caption.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex items-center">
+                            {{ image_form.is_primary }}
+                            <label for="id_is_primary" class="ml-2 block text-sm text-orange-700">
+                                Is Primary Image
+                            </label>
+                        </div>
+                        {% if image_form.is_primary.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ image_form.is_primary.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <a href="{% url 'properties:property_list' %}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-orange">
+                        Add Property
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleCommercialFields(propertyType) {
+    const commercialFields = document.getElementById('commercial-fields');
+    const numberOfFloorsField = document.getElementById('{{ form.number_of_floors.id_for_label }}');
+    const unitsPerFloorField = document.getElementById('{{ form.units_per_floor.id_for_label }}');
+    
+    if (propertyType === 'commercial') {
+        commercialFields.classList.remove('hidden');
+        numberOfFloorsField.required = true;
+        unitsPerFloorField.required = true;
+    } else {
+        commercialFields.classList.add('hidden');
+        numberOfFloorsField.required = false;
+        unitsPerFloorField.required = false;
+        // Clear values when hiding
+        numberOfFloorsField.value = '';
+        unitsPerFloorField.value = '';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const propertyTypeSelect = document.getElementById('{{ form.property_type.id_for_label }}');
+    if (propertyTypeSelect.value) {
+        toggleCommercialFields(propertyTypeSelect.value);
+    }
+});
+</script>
+{% endblock %}

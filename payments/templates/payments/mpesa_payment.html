@@ -1,0 +1,106 @@
+{% extends 'users/base.html' %}
+
+{% block title %}MPesa Payment - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8">
+        <h1 class="text-2xl font-bold text-orange-900 mb-2">MPesa Payment</h1>
+        <p class="text-orange-700">Complete your payment using MPesa mobile money</p>
+    </div>
+    
+    <!-- Payment Type Selection -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-orange-900 mb-4">Select Payment Type</h2>
+        <div class="bg-white rounded-lg shadow border border-orange-200 p-6">
+            <form method="post">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <input type="radio" id="security_deposit" name="payment_type" value="security_deposit" class="form-check-input text-orange-600 focus:ring-orange-500">
+                        <label for="security_deposit" class="ml-3 text-sm font-medium text-orange-900">
+                            <div class="flex items-center">
+                                <span class="text-lg mr-2">🔒</span>
+                                Security Deposit
+                            </div>
+                            <p class="text-sm text-orange-600 mt-1">Pay your security deposit (113% of monthly rent)</p>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="radio" id="rent" name="payment_type" value="rent" class="form-check-input text-orange-600 focus:ring-orange-500">
+                        <label for="rent" class="ml-3 text-sm font-medium text-orange-900">
+                            <div class="flex items-center">
+                                <span class="text-lg mr-2">🏠</span>
+                                Rent Payment
+                            </div>
+                            <p class="text-sm text-orange-600 mt-1">Pay your monthly rent (1-6 months)</p>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button type="submit" class="w-full bg-orange-600 text-white py-3 px-4 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
+                        Continue to MPesa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- MPesa Instructions -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-orange-900 mb-4">MPesa Payment Instructions</h2>
+        <div class="bg-white rounded-lg shadow border border-orange-200 p-6">
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span class="text-orange-600 font-semibold">1</span>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-orange-900">Select Payment Type</h3>
+                        <p class="text-sm text-orange-600 mt-1">Choose between security deposit or rent payment</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span class="text-orange-600 font-semibold">2</span>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-orange-900">Enter MPesa Details</h3>
+                        <p class="text-sm text-orange-600 mt-1">Provide your MPesa registered phone number</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span class="text-orange-600 font-semibold">3</span>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-orange-900">Complete Payment</h3>
+                        <p class="text-sm text-orange-600 mt-1">Follow the MPesa prompts to complete your payment</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <span class="text-orange-600 font-semibold">4</span>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-orange-900">Receive Confirmation</h3>
+                        <p class="text-sm text-orange-600 mt-1">Get instant confirmation and receipt</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back to Payment Methods -->
+    <div class="mt-8 text-center">
+        <a href="{% url 'payments:make_payment' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+            ← Back to Payment Methods
+        </a>
+    </div>
+</div>
+{% endblock %}

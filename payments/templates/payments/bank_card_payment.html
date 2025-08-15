@@ -1,0 +1,127 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Bank Card Payment - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8">
+        <h1 class="text-2xl font-bold text-orange-900 mb-2">Bank Card Payment</h1>
+        <p class="text-orange-700">Complete your payment using your credit or debit card</p>
+    </div>
+    
+    <!-- Payment Type Selection -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-orange-900 mb-4">Select Payment Type</h2>
+        <div class="bg-white rounded-lg shadow border border-orange-200 p-6">
+            <form method="post">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <input type="radio" id="security_deposit" name="payment_type" value="security_deposit" class="form-check-input text-orange-600 focus:ring-orange-500">
+                        <label for="security_deposit" class="ml-3 text-sm font-medium text-orange-900">
+                            <div class="flex items-center">
+                                <span class="text-lg mr-2">🔒</span>
+                                Security Deposit
+                            </div>
+                            <p class="text-sm text-orange-600 mt-1">Pay your security deposit (113% of monthly rent)</p>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="radio" id="rent" name="payment_type" value="rent" class="form-check-input text-orange-600 focus:ring-orange-500">
+                        <label for="rent" class="ml-3 text-sm font-medium text-orange-900">
+                            <div class="flex items-center">
+                                <span class="text-lg mr-2">🏠</span>
+                                Rent Payment
+                            </div>
+                            <p class="text-sm text-orange-600 mt-1">Pay your monthly rent (1-6 months)</p>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button type="submit" class="w-full bg-orange-600 text-white py-3 px-4 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
+                        Continue to Card Details
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Accepted Cards -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-orange-900 mb-4">Accepted Payment Methods</h2>
+        <div class="bg-white rounded-lg shadow border border-orange-200 p-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-4xl mb-2">💳</div>
+                    <p class="text-sm font-medium text-orange-900">Visa</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">💳</div>
+                    <p class="text-sm font-medium text-orange-900">Mastercard</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">💳</div>
+                    <p class="text-sm font-medium text-orange-900">American Express</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">💳</div>
+                    <p class="text-sm font-medium text-orange-900">Discover</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Security Information -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-orange-900 mb-4">Security & Privacy</h2>
+        <div class="bg-white rounded-lg shadow border border-orange-200 p-6">
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-green-900">SSL Encrypted</h3>
+                        <p class="text-sm text-green-600 mt-1">All transactions are secured with 256-bit SSL encryption</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-green-900">PCI Compliant</h3>
+                        <p class="text-sm text-green-600 mt-1">We meet the highest security standards for payment processing</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-medium text-green-900">No Data Storage</h3>
+                        <p class="text-sm text-green-600 mt-1">We never store your complete card information</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back to Payment Methods -->
+    <div class="mt-8 text-center">
+        <a href="{% url 'payments:make_payment' %}" class="text-orange-600 hover:text-orange-500 font-medium">
+            ← Back to Payment Methods
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,294 @@
+/* Global Orange Color Scheme */
+:root {
+    --orange-50: #fff7ed;
+    --orange-100: #ffedd5;
+    --orange-200: #fed7aa;
+    --orange-300: #fdba74;
+    --orange-400: #fb923c;
+    --orange-500: #f97316;
+    --orange-600: #ea580c;
+    --orange-700: #c2410c;
+    --orange-800: #9a3412;
+    --orange-900: #7c2d12;
+}
+
+/* Import Brush Script MT Font */
+@import url('https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap');
+
+/* Base Styles */
+body {
+    color: var(--orange-800);
+    background-color: var(--orange-50);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--orange-900);
+}
+
+p, span, div {
+    color: var(--orange-700);
+}
+
+/* Wisham Title Styling */
+.wisham-title {
+    font-family: 'Brush Script MT', cursive;
+    font-weight: 900;
+    font-size: 2rem;
+    text-shadow: 
+        2px 2px 0px var(--orange-200),
+        4px 4px 0px var(--orange-300),
+        6px 6px 0px var(--orange-400);
+    color: var(--orange-600);
+    letter-spacing: 2px;
+    transform: rotate(-2deg);
+    display: inline-block;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: rotate(-2deg) translateY(0);
+    }
+    40% {
+        transform: rotate(-2deg) translateY(-10px);
+    }
+    60% {
+        transform: rotate(-2deg) translateY(-5px);
+    }
+}
+
+/* Background image for dashboard areas */
+.dashboard-bg {
+    background-image: url('../images/modern-flat-kenya.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Links */
+a {
+    color: var(--orange-600);
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--orange-500);
+}
+
+/* Form Controls */
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--orange-200);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: var(--orange-800);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--orange-500);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--orange-400);
+}
+
+/* Form Labels */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--orange-800);
+}
+
+/* Buttons */
+.btn, button[type="submit"], input[type="submit"] {
+    background-color: var(--orange-500) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.btn:hover, button[type="submit"]:hover, input[type="submit"]:hover {
+    background-color: var(--orange-600) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
+}
+
+.btn:focus, button[type="submit"]:focus, input[type="submit"]:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3) !important;
+}
+
+/* Form Elements */
+input[type="text"], input[type="email"], input[type="password"], 
+input[type="tel"], input[type="number"], textarea, select {
+    border: 2px solid var(--orange-200) !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    transition: border-color 0.2s ease !important;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus,
+input[type="tel"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+    border-color: var(--orange-500) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1) !important;
+}
+
+/* Labels */
+label {
+    color: var(--orange-800) !important;
+    font-weight: 600 !important;
+}
+
+/* Cards and Containers */
+.card, .bg-white {
+    border: 1px solid var(--orange-200) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(249, 115, 22, 0.1) !important;
+}
+
+/* Navigation */
+.navbar, nav {
+    background-color: white !important;
+    border-bottom: 2px solid var(--orange-200) !important;
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+    color: var(--orange-600) !important;
+    font-weight: bold !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--orange-500) !important;
+}
+
+/* Navigation buttons for actions */
+.nav-action-btn {
+    background-color: var(--orange-500) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.nav-action-btn:hover {
+    background-color: var(--orange-600) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
+}
+
+.nav-action-btn:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3) !important;
+}
+
+/* Navigation rectangles for non-actions */
+.nav-non-action {
+    background-color: transparent !important;
+    color: var(--orange-600) !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 0 !important;
+    font-weight: bold !important;
+}
+
+.nav-non-action:hover {
+    color: var(--orange-500) !important;
+}
+
+/* Active window highlight */
+.nav-active {
+    color: #3b82f6 !important; /* Blue color */
+    font-weight: bold !important;
+}
+
+/* Alerts and Messages */
+.alert-success, .bg-green-100 {
+    background-color: var(--orange-100) !important;
+    border-color: var(--orange-400) !important;
+    color: var(--orange-700) !important;
+}
+
+.alert-error, .bg-red-100 {
+    background-color: #fef2f2 !important;
+    border-color: #f87171 !important;
+    color: #dc2626 !important;
+}
+
+/* Tables */
+table {
+    border-color: var(--orange-200) !important;
+}
+
+th {
+    background-color: var(--orange-100) !important;
+    color: var(--orange-800) !important;
+}
+
+td {
+    border-color: var(--orange-200) !important;
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--orange-600) !important;
+    border-color: var(--orange-200) !important;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--orange-100) !important;
+    border-color: var(--orange-400) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--orange-500) !important;
+    border-color: var(--orange-500) !important;
+}
+
+/* Custom Button Classes */
+.btn-orange {
+    background-color: var(--orange-500) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-orange:hover {
+    background-color: var(--orange-600) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
+}
+
+/* Override Crispy Forms */
+.crispy-tailwind .btn {
+    background-color: var(--orange-500) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+.crispy-tailwind .btn:hover {
+    background-color: var(--orange-600) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
+}

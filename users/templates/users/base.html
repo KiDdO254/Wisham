@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Wisham{% endblock %}</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body class="bg-orange-50 min-h-screen">
+    <!-- Unified Navigation Bar -->
+    <nav class="bg-white shadow-sm border-b border-orange-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'users:dashboard' %}" class="wisham-title">
+                        Wisham
+                    </a>
+                </div>
+                
+                <!-- Main Navigation Links - Desktop -->
+                <div class="hidden md:flex items-center space-x-8">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'users:dashboard' %}" class="nav-action-btn{% if request.resolver_match.url_name == 'dashboard' %} nav-active{% endif %}">
+                            Dashboard
+                        </a>
+                        <a href="{% url 'properties:property_list' %}" class="nav-action-btn{% if request.resolver_match.url_name == 'property_list' %} nav-active{% endif %}">
+                            Properties
+                        </a>
+                        {% if user.role == 'TENANT' %}
+                            <a href="{% url 'payments:make_payment' %}" class="nav-action-btn{% if 'payments' in request.path %} nav-active{% endif %}">
+                                Make Payment
+                            </a>
+                        {% endif %}
+                        {% if user.role in 'ADMIN,PROPERTY_MANAGER,LANDLORD' %}
+                            <div class="relative group">
+                                <button class="nav-action-btn group-hover:bg-orange-100">
+                                    Management
+                                    <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                    <a href="{% url 'users:add_tenant' %}" class="block px-4 py-2 text-sm text-orange-700 hover:bg-orange-50">
+                                        Add Tenant
+                                    </a>
+                                    <a href="{% url 'properties:add_property' %}" class="block px-4 py-2 text-sm text-orange-700 hover:bg-orange-50">
+                                        Add Property
+                                    </a>
+                                    <a href="{% url 'properties:add_rental_unit' %}" class="block px-4 py-2 text-sm text-orange-700 hover:bg-orange-50">
+                                        Add Rental Unit
+                                    </a>
+                                    <a href="{% url 'properties:add_amenity' %}" class="block px-4 py-2 text-sm text-orange-700 hover:bg-orange-50">
+                                        Add Amenity
+                                    </a>
+                                    <a href="{% url 'payments:view_payments' %}" class="block px-4 py-2 text-sm text-orange-700 hover:bg-orange-50">
+                                        View Payments
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if user.role == 'ADMIN' %}
+                            <a href="{% url 'admin:index' %}" class="nav-action-btn">
+                                Admin Panel
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-orange-600 hover:text-orange-500 focus:outline-none focus:text-orange-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <span class="hidden sm:inline nav-non-action">Welcome, {{ user.first_name|default:user.username }}</span>
+                        <a href="{% url 'users:profile' %}" class="nav-action-btn{% if request.resolver_match.url_name == 'profile' %} nav-active{% endif %}">Profile</a>
+                        <a href="{% url 'users:logout' %}" class="nav-action-btn">Logout</a>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="nav-action-btn{% if request.resolver_match.url_name == 'login' %} nav-active{% endif %}">Login</a>
+                        <a href="{% url 'users:register' %}" class="nav-action-btn{% if request.resolver_match.url_name == 'register' %} nav-active{% endif %}">
+                            Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 bg-orange-50 border-t border-orange-200">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'users:dashboard' %}" class="block px-3 py-2 text-base font-medium text-orange-700 hover:text-orange-900 hover:bg-orange-100 rounded-md">
+                            Dashboard
+                        </a>
+                        <a href="{% url 'properties:property_list' %}" class="block px-3 py-2 text-base font-medium text-orange-700 hover:text-orange-900 hover:bg-orange-100 rounded-md">
+                            Properties
+                        </a>
+                        {% if user.role == 'TENANT' %}
+                            <a href="{% url 'payments:make_payment' %}" class="block px-3 py-2 text-base font-medium text-orange-700 hover:text-orange-900 hover:bg-orange-100 rounded-md">
+                                Make Payment
+                            </a>
+                        {% endif %}
+                        {% if user.role in 'ADMIN,PROPERTY_MANAGER,LANDLORD' %}
+                            <div class="px-3 py-2">
+                                <div class="text-sm font-semibold text-orange-800 mb-2">Management</div>
+                                <div class="pl-4 space-y-1">
+                                    <a href="{% url 'users:add_tenant' %}" class="block px-3 py-2 text-sm text-orange-600 hover:text-orange-800 hover:bg-orange-100 rounded-md">
+                                        Add Tenant
+                                    </a>
+                                    <a href="{% url 'properties:add_property' %}" class="block px-3 py-2 text-sm text-orange-600 hover:text-orange-800 hover:bg-orange-100 rounded-md">
+                                        Add Property
+                                    </a>
+                                    <a href="{% url 'properties:add_rental_unit' %}" class="block px-3 py-2 text-sm text-orange-600 hover:text-orange-800 hover:bg-orange-100 rounded-md">
+                                        Add Rental Unit
+                                    </a>
+                                    <a href="{% url 'properties:add_amenity' %}" class="block px-3 py-2 text-sm text-orange-600 hover:text-orange-800 hover:bg-orange-100 rounded-md">
+                                        Add Amenity
+                                    </a>
+                                    <a href="{% url 'payments:view_payments' %}" class="block px-3 py-2 text-sm text-orange-600 hover:text-orange-800 hover:bg-orange-100 rounded-md">
+                                        View Payments
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if user.role == 'ADMIN' %}
+                            <a href="{% url 'admin:index' %}" class="block px-3 py-2 text-base font-medium text-orange-700 hover:text-orange-900 hover:bg-orange-100 rounded-md">
+                                Admin Panel
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    {% if message.tags == 'error' or message.level_tag == 'error' %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div class="bg-orange-100 border border-orange-400 text-orange-700 px-4 py-3 rounded mb-4">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-white border-t border-orange-200 mt-12">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-orange-600 text-sm">
+                © 2024 Wisham. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu JavaScript -->
+    <script>
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

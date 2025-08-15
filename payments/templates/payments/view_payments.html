@@ -1,0 +1,235 @@
+{% extends 'users/base.html' %}
+
+{% block title %}View Payments - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8">
+        <h1 class="text-2xl font-bold text-orange-900 mb-2">Payment Management</h1>
+        <p class="text-orange-700">View and manage all payment records</p>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Total Payments</h3>
+                <p class="text-3xl font-bold text-orange-600">{{ total_payments }}</p>
+                <p class="text-sm text-orange-600">All Time</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Total Amount</h3>
+                <p class="text-3xl font-bold text-orange-600">KES {{ total_amount|floatformat:2 }}</p>
+                <p class="text-sm text-orange-600">Completed</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Pending</h3>
+                <p class="text-3xl font-bold text-yellow-600">{{ pending_payments }}</p>
+                <p class="text-sm text-orange-600">Awaiting Processing</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200">
+                <h3 class="text-lg font-medium text-orange-900 mb-2">Success Rate</h3>
+                <p class="text-3xl font-bold text-green-600">
+                    {% if total_payments > 0 %}
+                        {{ total_amount|floatformat:1 }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </p>
+                <p class="text-sm text-orange-600">Completion Rate</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters and Search -->
+    <div class="mt-8">
+        <div class="bg-white rounded-lg shadow border border-orange-200 p-6">
+            <form method="get" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label for="search" class="block text-sm font-medium text-orange-700 mb-1">Search</label>
+                        <input type="text" name="search" id="search" value="{{ search_query }}" 
+                               placeholder="Search by tenant name..." 
+                               class="form-control">
+                    </div>
+                    
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-orange-700 mb-1">Status</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+                            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="payment_type" class="block text-sm font-medium text-orange-700 mb-1">Payment Type</label>
+                        <select name="payment_type" id="payment_type" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="rent" {% if payment_type_filter == 'rent' %}selected{% endif %}>Rent Payment</option>
+                            <option value="security_deposit" {% if payment_type_filter == 'security_deposit' %}selected{% endif %}>Security Deposit</option>
+                            <option value="other" {% if payment_type_filter == 'other' %}selected{% endif %}>Other Payment</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
+                            Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Payments Table -->
+    <div class="mt-8">
+        <div class="bg-white rounded-lg shadow border border-orange-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-orange-200">
+                    <thead class="bg-orange-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Tenant</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Property/Unit</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Payment Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Method</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Period</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-orange-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-orange-200">
+                        {% for payment in page_obj %}
+                        <tr class="hover:bg-orange-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-orange-900">
+                                    {{ payment.tenant.get_full_name|default:payment.tenant.username }}
+                                </div>
+                                <div class="text-sm text-orange-600">{{ payment.tenant.email }}</div>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-orange-900">{{ payment.property.name }}</div>
+                                <div class="text-sm text-orange-600">Unit {{ payment.rental_unit.unit_number }}</div>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if payment.payment_type == 'rent' %}bg-blue-100 text-blue-800
+                                    {% elif payment.payment_type == 'security_deposit' %}bg-purple-100 text-purple-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ payment.get_payment_type_display }}
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-900">
+                                {% if payment.payment_method == 'mpesa' %}
+                                    <span class="flex items-center">
+                                        <span class="mr-2">📱</span> MPesa
+                                    </span>
+                                {% elif payment.payment_method == 'bank_card' %}
+                                    <span class="flex items-center">
+                                        <span class="mr-2">💳</span> Bank Card
+                                    </span>
+                                {% else %}
+                                    {{ payment.get_payment_method_display }}
+                                {% endif %}
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-orange-900">
+                                {{ payment.get_amount_display }}
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-900">
+                                {% if payment.payment_type == 'rent' and payment.months_paid_for %}
+                                    {{ payment.months_paid_for }} month{{ payment.months_paid_for|pluralize }}
+                                    {% if payment.rent_period_start and payment.rent_period_end %}
+                                        <br><span class="text-xs text-orange-600">
+                                            {{ payment.rent_period_start|date:"M Y" }} - {{ payment.rent_period_end|date:"M Y" }}
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-900">
+                                {{ payment.payment_date|date:"M d, Y" }}
+                                <br><span class="text-xs text-orange-600">{{ payment.payment_date|date:"H:i" }}</span>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if payment.status == 'completed' %}bg-green-100 text-green-800
+                                    {% elif payment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif payment.status == 'processing' %}bg-blue-100 text-blue-800
+                                    {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'payments:payment_details' payment.payment_id %}" 
+                                   class="text-orange-600 hover:text-orange-900 mr-3">View</a>
+                                {% if user.role in 'ADMIN,PROPERTY_MANAGER' and payment.status != 'completed' %}
+                                    <a href="{% url 'payments:update_payment_status' payment.payment_id %}" 
+                                       class="text-blue-600 hover:text-blue-900">Update</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="px-6 py-4 text-center text-sm text-orange-600">
+                                No payments found matching your criteria.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="mt-8 flex justify-center">
+        <nav class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_type_filter %}&payment_type={{ payment_type_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-orange-500 bg-white border border-orange-300 rounded-md hover:bg-orange-50">
+                    First
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_type_filter %}&payment_type={{ payment_type_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-orange-500 bg-white border border-orange-300 rounded-md hover:bg-orange-50">
+                    Previous
+                </a>
+            {% endif %}
+            
+            <span class="px-3 py-2 text-sm text-orange-700">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_type_filter %}&payment_type={{ payment_type_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-orange-500 bg-white border border-orange-300 rounded-md hover:bg-orange-50">
+                    Next
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if payment_type_filter %}&payment_type={{ payment_type_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-orange-500 bg-white border border-orange-300 rounded-md hover:bg-orange-50">
+                    Last
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

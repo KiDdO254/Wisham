@@ -1,0 +1,30 @@
+{% extends 'users/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - Wisham{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl w-full space-y-8">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-orange-900">
+                Create your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-orange-700">
+                Already have an account?
+                <a href="{% url 'users:login' %}" class="font-medium text-orange-600 hover:text-orange-500">
+                    Sign in here
+                </a>
+            </p>
+        </div>
+        
+        <div class="bg-white py-8 px-6 shadow-lg rounded-lg border border-orange-200">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                {% crispy form %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

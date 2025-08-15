@@ -1,0 +1,140 @@
+/* Custom admin styles for Django Unfold */
+
+/* Ensure proper form field styling */
+.form-row .field-box input,
+.form-row .field-box select,
+.form-row .field-box textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.form-row .field-box input:focus,
+.form-row .field-box select:focus,
+.form-row .field-box textarea:focus {
+    outline: none;
+    border-color: #F2B82F;
+    box-shadow: 0 0 0 3px rgba(242, 184, 47, 0.1);
+}
+
+/* Style form labels */
+.form-row label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+/* Style required field indicators */
+.form-row .required label:after {
+    content: " *";
+    color: #ef4444;
+}
+
+/* Style help text */
+.help {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* Style error messages */
+.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0;
+}
+
+.errorlist li {
+    color: #ef4444;
+    font-size: 0.875rem;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Style buttons */
+.submit-row input[type="submit"],
+.button {
+    background-color: #F2B82F;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-row input[type="submit"]:hover,
+.button:hover {
+    background-color: #e0a800;
+}
+
+/* Style delete buttons */
+.deletelink {
+    background-color: #ef4444 !important;
+}
+
+.deletelink:hover {
+    background-color: #dc2626 !important;
+}
+
+/* Style the admin header */
+#header {
+    background-color: #F2B82F;
+    color: white;
+}
+
+/* Improve table styling */
+.results table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results th,
+.results td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.results th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Style pagination */
+.paginator {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.paginator a,
+.paginator .this-page {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.125rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    color: #374151;
+}
+
+.paginator a:hover {
+    background-color: #f3f4f6;
+}
+
+.paginator .this-page {
+    background-color: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
