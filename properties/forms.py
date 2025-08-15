@@ -12,7 +12,7 @@ class PropertyForm(forms.ModelForm):
         fields = [
             'name', 'address', 'county', 'town', 'property_type', 'description',
             'number_of_floors', 'units_per_floor', 'contact_phone', 'contact_email', 
-            'amenities', 'is_active', 'owner'
+            'amenities', 'is_active'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -32,9 +32,9 @@ class PropertyForm(forms.ModelForm):
             # Only show amenities that are available
             self.fields['amenities'].queryset = Amenity.objects.all()
             # Set the owner to the current user
-            if not self.instance.pk:  # Only for new properties
-                self.fields['owner'].initial = user
-                self.fields['owner'].widget = forms.HiddenInput()
+            # if not self.instance.pk:  # Only for new properties
+            #     self.fields['owner'].initial = user
+            #     self.fields['owner'].widget = forms.HiddenInput()
         
         # Make commercial fields required when property type is commercial
         self.fields['number_of_floors'].required = False
@@ -179,8 +179,8 @@ class AmenityForm(forms.ModelForm):
         }
 
 
-class PropertyImageForm(forms.Form):
+class PropertyImageForm(forms.ModelForm):
     """Form for uploading property images"""
-    image = forms.ImageField()
-    caption = forms.CharField(max_length=200, required=False)
-    is_primary = forms.BooleanField(required=False)
+    class Meta:
+        model = PropertyImage
+        fields = ['image', 'caption', 'is_primary']

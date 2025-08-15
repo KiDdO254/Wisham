@@ -32,25 +32,33 @@ def add_property(request):
     # Check if user has permission to add properties
     if request.user.role not in [Role.ADMIN, Role.PROPERTY_MANAGER, Role.LANDLORD]:
         return HttpResponseForbidden("You don't have permission to add properties.")
-    
+
     if request.method == 'POST':
-        form = PropertyForm(request.POST, user=request.user)
-        if form.is_valid():
+        # Pass request.POST and request.FILES to both forms
+        form = PropertyForm(request.POST, request.FILES, user=request.user)
+        image_form = PropertyImageForm(request.POST, request.FILES)
+
+        if form.is_valid() and image_form.is_valid():
             property = form.save(commit=False)
             # Set the owner to the current user if not already set
-            if not property.owner_id:
-                property.owner = request.user
+            property.owner = request.user
             property.save()
-            form.save_m2m()  # Save many-to-many relationships
             
-            messages.success(request, 'Property added successfully!')
+
+            # Save the images and link them to the newly created property
+            image_form = image_form.save(commit=False)
+            image_form.property = property
+            image_form.save()
+
+            messages.success(request, 'Property and images added successfully!')
             return redirect('properties:property_list')
+        else:
+            print(form.errors)
+            print(image_form.errors)
     else:
         form = PropertyForm(user=request.user)
-    
-    # Add image form for property images
-    image_form = PropertyImageForm()
-    
+        image_form = PropertyImageForm()
+
     return render(request, 'properties/add_property.html', {
         'form': form,
         'image_form': image_form,

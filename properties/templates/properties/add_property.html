@@ -11,7 +11,7 @@
                 Add New Property
             </h2>
             
-            <form method="post" class="text-left bg-white p-6 rounded-lg shadow border border-orange-200">
+            <form method="post" enctype="multipart/form-data" class="text-left bg-white p-6 rounded-lg shadow border border-orange-200">
                 {% csrf_token %}
                 
                 {% if form.non_field_errors %}
