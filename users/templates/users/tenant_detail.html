@@ -1,0 +1,182 @@
+{% extends 'users/base.html' %}
+
+{% block title %}{{ title }} - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8 dashboard-bg">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="text-3xl font-bold text-orange-900 mb-4">
+                Tenant Details
+            </h2>
+            <p class="text-lg text-orange-700 mb-6">
+                {{ tenant.get_full_name|default:tenant.username }}
+            </p>
+            
+            <!-- User Information Card -->
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200 mb-8 max-w-3xl mx-auto">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="h-20 w-20 rounded-full bg-orange-100 flex items-center justify-center">
+                        <span class="text-orange-600 font-bold text-2xl">
+                            {{ tenant.first_name|first }}{{ tenant.last_name|first }}
+                        </span>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold text-orange-900 mb-4">User Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-6">
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Username:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">@{{ tenant.username }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Full Name:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ tenant.get_full_name|default:"Not provided" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Email:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ tenant.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Phone Number:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ tenant.phone_number|default:"Not provided" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Role:</span></p>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                            {% if tenant.role == 'ADMIN' %}bg-red-100 text-red-800
+                            {% elif tenant.role == 'PROPERTY_MANAGER' %}bg-blue-100 text-blue-800
+                            {% elif tenant.role == 'LANDLORD' %}bg-green-100 text-green-800
+                            {% elif tenant.role == 'TENANT' %}bg-orange-100 text-orange-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ tenant.get_role_display }}
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Member Since:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ tenant.created_at|date:"F j, Y" }}</p>
+                    </div>
+                </div>
+                
+                {% if tenant.created_by %}
+                <div class="border-t pt-4">
+                    <p class="text-sm text-gray-600"><span class="font-medium">Account Created By:</span></p>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {{ tenant.created_by.get_full_name|default:tenant.created_by.username }}
+                        <span class="text-sm text-gray-500">({{ tenant.created_by.get_role_display }})</span>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Current Rental Units -->
+            {% if current_units %}
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200 mb-8 max-w-4xl mx-auto">
+                <h3 class="text-xl font-bold text-orange-900 mb-4">Current Rental Units</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rent</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lease Period</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for unit in current_units %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ unit.property.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ unit.property.town }}, {{ unit.property.get_county_display }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ unit.unit_number }}</div>
+                                    <div class="text-sm text-gray-500">{{ unit.get_unit_type_display }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    KES {{ unit.rent_amount|floatformat:0 }}/month
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {% if unit.lease_start_date and unit.lease_end_date %}
+                                        {{ unit.lease_start_date|date:"M j, Y" }} - {{ unit.lease_end_date|date:"M j, Y" }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Reservation History -->
+            {% if reservations %}
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200 mb-8 max-w-4xl mx-auto">
+                <h3 class="text-xl font-bold text-orange-900 mb-4">Reservation History</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reservation Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Move-in Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for reservation in reservations %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ reservation.unit.unit_number }}</div>
+                                    <div class="text-sm text-gray-500">{{ reservation.unit.property.name }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if reservation.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif reservation.status == 'paid' %}bg-blue-100 text-blue-800
+                                        {% elif reservation.status == 'confirmed' %}bg-green-100 text-green-800
+                                        {% elif reservation.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ reservation.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ reservation.reservation_date|date:"M j, Y" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ reservation.intended_move_in_date|date:"M j, Y" }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <a href="{% url 'users:tenant_list' %}" 
+                   class="px-6 py-3 border border-gray-300 rounded-md text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to User List
+                </a>
+                
+                <a href="{% url 'users:add_tenant' %}" 
+                   class="px-6 py-3 border border-transparent rounded-md text-base font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Another User
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -160,7 +160,7 @@
                     <h3 class="text-lg font-medium text-orange-900 mb-3">Property Images</h3>
                     <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
                         <div class="mb-3">
-                            <label for="id_image" class="block text-sm font-medium text-orange-800 mb-1">
+                            <label for="{{ image_form.image.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
                                 Upload Image
                             </label>
                             {{ image_form.image }}
@@ -170,7 +170,7 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="id_caption" class="block text-sm font-medium text-orange-800 mb-1">
+                            <label for="{{ image_form.caption.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
                                 Caption
                             </label>
                             {{ image_form.caption }}
@@ -181,7 +181,7 @@
                         
                         <div class="flex items-center">
                             {{ image_form.is_primary }}
-                            <label for="id_is_primary" class="ml-2 block text-sm text-orange-700">
+                            <label for="{{ image_form.is_primary.id_for_label }}" class="ml-2 block text-sm text-orange-700">
                                 Is Primary Image
                             </label>
                         </div>

@@ -1,0 +1,427 @@
+{% extends 'users/base.html' %}
+
+{% block title %}{{ property.name }} - Property Details{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="max-w-7xl mx-auto">
+        <!-- Breadcrumb -->
+        <nav class="flex mb-6" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'properties:property_list' %}" class="text-orange-600 hover:text-orange-800">
+                        Properties
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-500 md:ml-2">{{ property.name }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Property Header -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h1 class="text-3xl font-bold text-gray-900">{{ property.name }}</h1>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                        {% if property.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {% if property.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-lg text-gray-600 mb-2">
+                            <span class="font-semibold">Type:</span> {{ property.get_property_type_display }}
+                        </p>
+                        <p class="text-lg text-gray-600 mb-2">
+                            <span class="font-semibold">Location:</span> {{ property.town }}, {{ property.get_county_display }}
+                        </p>
+                        <p class="text-lg text-gray-600 mb-4">
+                            <span class="font-semibold">Address:</span> {{ property.address }}
+                        </p>
+                        
+                        {% if property.contact_phone or property.contact_email %}
+                        <div class="border-t pt-4">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Contact Information</h3>
+                            {% if property.contact_phone %}
+                            <p class="text-gray-600 mb-1">
+                                <span class="font-medium">Phone:</span> {{ property.contact_phone }}
+                            </p>
+                            {% endif %}
+                            {% if property.contact_email %}
+                            <p class="text-gray-600">
+                                <span class="font-medium">Email:</span> 
+                                <a href="mailto:{{ property.contact_email }}" class="text-orange-600 hover:text-orange-800">
+                                    {{ property.contact_email }}
+                                </a>
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        {% if property.is_commercial %}
+                        <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                            <h3 class="text-lg font-semibold text-orange-900 mb-2">Commercial Details</h3>
+                            <p class="text-orange-800 mb-1">
+                                <span class="font-medium">Floors:</span> {{ property.number_of_floors }}
+                            </p>
+                            <p class="text-orange-800 mb-1">
+                                <span class="font-medium">Units per Floor:</span> {{ property.units_per_floor }}
+                            </p>
+                            <p class="text-orange-800">
+                                <span class="font-medium">Total Units:</span> {{ property.get_total_units }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-500">
+                                <span class="font-medium">Added:</span> {{ property.created_at|date:"F j, Y" }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                <span class="font-medium">Owner:</span> {{ property.owner.get_full_name|default:property.owner.username }}
+                            </p>
+                            {% if property.manager %}
+                            <p class="text-sm text-gray-500">
+                                <span class="font-medium">Manager:</span> {{ property.manager.get_full_name|default:property.manager.username }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Images -->
+        {% if images %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Property Images</h2>
+                
+                <!-- Primary Image -->
+                {% for image in images %}
+                    {% if image.is_primary %}
+                    <div class="mb-6">
+                        <div class="relative">
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ image.caption|default:property.name }}" 
+                                 class="w-full h-96 object-cover rounded-lg shadow-md">
+                            {% if image.caption %}
+                            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4 rounded-b-lg">
+                                <p class="text-lg font-medium">{{ image.caption }}</p>
+                            </div>
+                            {% endif %}
+                            <div class="absolute top-4 right-4">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                    Primary Image
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Other Images Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for image in images %}
+                        {% if not image.is_primary %}
+                        <div class="relative group">
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ image.caption|default:property.name }}" 
+                                 class="w-full h-48 object-cover rounded-lg shadow-md group-hover:shadow-lg transition-shadow duration-200">
+                            {% if image.caption %}
+                            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-3 rounded-b-lg">
+                                <p class="text-sm font-medium">{{ image.caption }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Property Description -->
+        {% if property.description %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+                <div class="prose max-w-none text-gray-700">
+                    {{ property.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Amenities -->
+        {% if amenities %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Amenities</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for amenity in amenities %}
+                    <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                        {% if amenity.icon %}
+                        <span class="text-2xl mr-3">{{ amenity.icon }}</span>
+                        {% endif %}
+                        <div>
+                            <h3 class="font-medium text-gray-900">{{ amenity.name }}</h3>
+                            {% if amenity.description %}
+                            <p class="text-sm text-gray-600">{{ amenity.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Rental Units -->
+        {% if units %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Rental Units</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rent</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Floor</th>
+                                {% if can_reserve %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for unit in units %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ unit.unit_number }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ unit.get_unit_type_display }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    KES {{ unit.rent_amount|floatformat:0 }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if unit.get_status_display == 'Available' %}bg-green-100 text-green-800
+                                        {% elif unit.get_status_display == 'Reserved' %}bg-yellow-100 text-yellow-800
+                                        {% elif unit.get_status_display == 'Occupied' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ unit.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {% if unit.floor_number %}
+                                        {% if unit.floor_number == 1 %}Ground Floor
+                                        {% elif unit.floor_number == 2 %}1st Floor
+                                        {% elif unit.floor_number == 3 %}2nd Floor
+                                        {% else %}{{ unit.floor_number|add:"-1" }}rd Floor{% endif %}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                {% if can_reserve %}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {% if unit.can_be_reserved %}
+                                    <button onclick="openReserveModal('{{ unit.id }}', '{{ unit.unit_number }}', '{{ unit.get_unit_type_display }}', '{{ unit.rent_amount }}', '{{ unit.deposit_amount }}')"
+                                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                        Reserve Unit
+                                    </button>
+                                    {% else %}
+                                    <span class="text-gray-400 text-xs">Not Available</span>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="flex justify-center space-x-4 mb-8">
+            <a href="{% url 'properties:property_list' %}" 
+               class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Properties
+            </a>
+            
+            {% if request.user.role in 'ADMIN,PROPERTY_MANAGER,LANDLORD' %}
+            <a href="{% url 'properties:add_rental_unit' %}" 
+               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Add Rental Unit
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal for Lightbox Effect -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <button id="closeModal" class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-10">
+                &times;
+            </button>
+            <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain">
+            <div id="modalCaption" class="absolute bottom-4 left-4 right-4 text-white text-center bg-black bg-opacity-50 p-2 rounded"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Unit Reservation Modal -->
+<div id="reserveModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Reserve Unit</h3>
+                <button onclick="closeReserveModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6">
+                <div class="mb-4">
+                    <h4 class="font-medium text-gray-900 mb-2">Unit Details</h4>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-600"><span class="font-medium">Unit:</span> <span id="modalUnitNumber"></span></p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Type:</span> <span id="modalUnitType"></span></p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Monthly Rent:</span> KES <span id="modalRent"></span></p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Security Deposit:</span> KES <span id="modalDeposit"></span></p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-4">
+                        To reserve this unit, you'll need to pay the security deposit within 24 hours. 
+                        The reservation will expire if payment is not completed.
+                    </p>
+                    
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-orange-800">
+                                    <strong>Important:</strong> You must pay the security deposit to confirm your reservation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-3">
+                    <button onclick="closeReserveModal()" 
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Cancel
+                    </button>
+                    <button onclick="proceedToReservation()" 
+                            class="flex-1 px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Proceed to Reservation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Image Modal Functionality
+function openImageModal(imageSrc, caption) {
+    document.getElementById('modalImage').src = imageSrc;
+    document.getElementById('modalCaption').textContent = caption || '';
+    document.getElementById('imageModal').classList.remove('hidden');
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').classList.add('hidden');
+}
+
+// Unit Reservation Modal Functionality
+let selectedUnitId = null;
+
+function openReserveModal(unitId, unitNumber, unitType, rentAmount, depositAmount) {
+    selectedUnitId = unitId;
+    document.getElementById('modalUnitNumber').textContent = unitNumber;
+    document.getElementById('modalUnitType').textContent = unitType;
+    document.getElementById('modalRent').textContent = rentAmount;
+    document.getElementById('modalDeposit').textContent = depositAmount;
+    document.getElementById('reserveModal').classList.remove('hidden');
+}
+
+function closeReserveModal() {
+    document.getElementById('reserveModal').classList.add('hidden');
+    selectedUnitId = null;
+}
+
+function proceedToReservation() {
+    if (selectedUnitId) {
+        window.location.href = `/properties/reserve-unit/${selectedUnitId}/`;
+    }
+}
+
+// Close modals when clicking outside
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+document.getElementById('reserveModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeReserveModal();
+    }
+});
+
+// Close modals with escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+        closeReserveModal();
+    }
+});
+
+// Image click handlers
+document.querySelectorAll('.property-image').forEach(function(img) {
+    img.addEventListener('click', function() {
+        openImageModal(this.src, this.alt);
+    });
+});
+
+// Close button handlers
+document.getElementById('closeModal').addEventListener('click', closeImageModal);
+</script>
+{% endblock %}

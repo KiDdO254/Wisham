@@ -2,6 +2,7 @@ from django import forms
 from .models import Property, RentalUnit, Amenity, PropertyImage
 from users.models import CustomUser
 from decimal import Decimal
+from .models import UnitReservation
 
 
 class PropertyForm(forms.ModelForm):
@@ -17,12 +18,16 @@ class PropertyForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'county': forms.Select(attrs={'class': 'form-control'}),
+            'town': forms.TextInput(attrs={'class': 'form-control'}),
+            'property_type': forms.Select(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'contact_phone': forms.TextInput(attrs={'class': 'form-control'}),
             'contact_email': forms.EmailInput(attrs={'class': 'form-control'}),
             'number_of_floors': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'units_per_floor': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'amenities': forms.CheckboxSelectMultiple(),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
     
     def __init__(self, *args, **kwargs):
@@ -73,20 +78,87 @@ class RentalUnitForm(forms.ModelForm):
         fields = [
             'property', 'unit_number', 'unit_type', 'rent_amount', 'deposit_amount', 
             'floor_number', 'floor_area', 'is_available', 'current_tenant',
-            'description'
+            'lease_start_date', 'lease_end_date', 'description'
         ]
         widgets = {
-            'property': forms.Select(attrs={'class': 'form-control'}),
-            'unit_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'rent_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'property': forms.Select(attrs={
+                'class': 'form-control',
+                'onchange': 'updateFloorChoices(this.value)'
+            }),
+            'unit_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., A101, Ground-01'
+            }),
+            'unit_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control', 
+                'rows': 3,
+                'placeholder': 'Describe the unit features, amenities, etc.'
+            }),
+            'rent_amount': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00'
+            }),
             'deposit_amount': forms.NumberInput(attrs={
                 'class': 'form-control', 
                 'step': '0.01',
-                'readonly': 'readonly'
+                'readonly': 'readonly',
+                'placeholder': 'Auto-calculated'
             }),
-            'floor_number': forms.Select(attrs={'class': 'form-control'}),
-            'floor_area': forms.NumberInput(attrs={'class': 'form-control'}),
+            'floor_number': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'floor_area': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'placeholder': '0'
+            }),
+            'current_tenant': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'lease_start_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'lease_end_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'is_available': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+        labels = {
+            'property': 'Property',
+            'unit_number': 'Unit Number',
+            'unit_type': 'Unit Type',
+            'rent_amount': 'Monthly Rent (KES)',
+            'deposit_amount': 'Security Deposit (KES)',
+            'floor_number': 'Floor Number',
+            'floor_area': 'Floor Area (sq ft)',
+            'is_available': 'Unit Available',
+            'current_tenant': 'Current Tenant',
+            'lease_start_date': 'Lease Start Date',
+            'lease_end_date': 'Lease End Date',
+            'description': 'Description'
+        }
+        help_texts = {
+            'property': 'Select the property where this unit will be located',
+            'unit_number': 'Enter a unique identifier for this unit (e.g., A101, Ground-01)',
+            'unit_type': 'Choose the type of rental unit',
+            'rent_amount': 'Enter the monthly rent amount in Kenyan Shillings',
+            'deposit_amount': 'Security deposit is automatically calculated as 113% of monthly rent',
+            'floor_number': 'Select the floor number (required for commercial properties)',
+            'floor_area': 'Enter the floor area in square feet',
+            'is_available': 'Check if the unit is currently available for rent',
+            'current_tenant': 'Select the current tenant if the unit is occupied',
+            'lease_start_date': 'Enter the start date of the lease agreement',
+            'lease_end_date': 'Enter the end date of the lease agreement',
+            'description': 'Describe the unit features, amenities, and any special characteristics'
         }
     
     def __init__(self, *args, **kwargs):
@@ -117,13 +189,8 @@ class RentalUnitForm(forms.ModelForm):
         # Initialize floor number choices
         self.fields['floor_number'].choices = [('', 'Select Floor')]
         
-        # Add JavaScript to update floor choices when property changes
-        self.fields['property'].widget.attrs.update({
-            'onchange': 'updateFloorChoices(this.value)'
-        })
-        
-        # Set initial floor choices if property is already selected
-        if self.instance.property:
+        # Set initial floor choices if property is already selected and instance exists
+        if hasattr(self, 'instance') and self.instance and self.instance.pk and self.instance.property:
             self.update_floor_choices(self.instance.property)
     
     def update_floor_choices(self, property):
@@ -150,6 +217,8 @@ class RentalUnitForm(forms.ModelForm):
         rent_amount = cleaned_data.get('rent_amount')
         property = cleaned_data.get('property')
         floor_number = cleaned_data.get('floor_number')
+        lease_start_date = cleaned_data.get('lease_start_date')
+        lease_end_date = cleaned_data.get('lease_end_date')
         
         if rent_amount:
             # Calculate security deposit as 113% of monthly rent
@@ -162,6 +231,24 @@ class RentalUnitForm(forms.ModelForm):
                 self.add_error('floor_number', 'Floor number is required for commercial properties.')
             elif floor_number > property.number_of_floors:
                 self.add_error('floor_number', f'Floor number cannot exceed {property.number_of_floors}.')
+        
+        # Validate lease dates
+        if lease_start_date and lease_end_date:
+            if lease_start_date >= lease_end_date:
+                self.add_error('lease_end_date', 'Lease end date must be after lease start date.')
+        
+        # Validate unit number uniqueness within the same property
+        unit_number = cleaned_data.get('unit_number')
+        if unit_number and property:
+            existing_units = RentalUnit.objects.filter(
+                property=property, 
+                unit_number=unit_number
+            )
+            if self.instance.pk:
+                existing_units = existing_units.exclude(pk=self.instance.pk)
+            
+            if existing_units.exists():
+                self.add_error('unit_number', f'A unit with number "{unit_number}" already exists in this property.')
         
         return cleaned_data
 
@@ -184,3 +271,60 @@ class PropertyImageForm(forms.ModelForm):
     class Meta:
         model = PropertyImage
         fields = ['image', 'caption', 'is_primary']
+        widgets = {
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
+                'required': False
+            }),
+            'caption': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter image caption (optional)'
+            }),
+            'is_primary': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make image field not required since it's optional
+        self.fields['image'].required = False
+
+
+class UnitReservationForm(forms.ModelForm):
+    """Form for tenants to reserve rental units"""
+    
+    class Meta:
+        model = UnitReservation
+        fields = ['intended_move_in_date', 'notes']
+        widgets = {
+            'intended_move_in_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'min': 'today'
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Any special requirements or notes for your reservation...'
+            }),
+        }
+        labels = {
+            'intended_move_in_date': 'Intended Move-in Date',
+            'notes': 'Additional Notes'
+        }
+        help_texts = {
+            'intended_move_in_date': 'When do you plan to move into this unit?',
+            'notes': 'Any special requirements or additional information for your reservation'
+        }
+    
+    def clean_intended_move_in_date(self):
+        """Validate that move-in date is in the future"""
+        from django.utils import timezone
+        from datetime import date
+        
+        move_in_date = self.cleaned_data.get('intended_move_in_date')
+        if move_in_date and move_in_date <= date.today():
+            raise forms.ValidationError("Move-in date must be in the future.")
+        return move_in_date

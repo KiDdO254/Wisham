@@ -1,6 +1,6 @@
 {% extends 'users/base.html' %}
 
-{% block title %}Add Tenant - Wisham{% endblock %}
+{% block title %}{{ title }} - Wisham{% endblock %}
 
 {% block content %}
 <div class="px-4 py-6 sm:px-0">
@@ -8,8 +8,17 @@
         <div class="text-center">
             <h1 class="wisham-title mb-4">Wisham</h1>
             <h2 class="text-3xl font-bold text-orange-900 mb-4">
-                Add New Tenant
+                Add New User
             </h2>
+            <p class="text-lg text-orange-700 mb-6">
+                {% if user_role == 'ADMIN' %}
+                    Create a new user account with any role
+                {% elif user_role == 'PROPERTY_MANAGER' %}
+                    Add a new tenant to your managed properties
+                {% elif user_role == 'LANDLORD' %}
+                    Add a new tenant to your properties
+                {% endif %}
+            </p>
             
             <form method="post" class="text-left bg-white p-6 rounded-lg shadow border border-orange-200 max-w-2xl mx-auto">
                 {% csrf_token %}
@@ -21,89 +30,130 @@
                 {% endif %}
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
-                            First Name *
-                        </label>
-                        {{ form.first_name }}
-                        {% if form.first_name.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    
-                    <div>
-                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
-                            Last Name *
-                        </label>
-                        {{ form.last_name }}
-                        {% if form.last_name.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    
-                    <div>
+                    <!-- Username -->
+                    <div class="md:col-span-2">
                         <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
-                            Username *
+                            {{ form.username.label }} *
                         </label>
                         {{ form.username }}
                         {% if form.username.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ form.username.errors.0 }}</p>
                         {% endif %}
+                        {% if form.username.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.username.help_text }}</p>
+                        {% endif %}
                     </div>
                     
-                    <div>
+                    <!-- Email -->
+                    <div class="md:col-span-2">
                         <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
-                            Email *
+                            {{ form.email.label }} *
                         </label>
                         {{ form.email }}
                         {% if form.email.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
                         {% endif %}
+                        {% if form.email.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.email.help_text }}</p>
+                        {% endif %}
                     </div>
                     
+                    <!-- First Name -->
                     <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            {{ form.first_name.label }} *
+                        </label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                        {% endif %}
+                        {% if form.first_name.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.first_name.help_text }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Last Name -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            {{ form.last_name.label }} *
+                        </label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                        {% endif %}
+                        {% if form.last_name.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.last_name.help_text }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Phone Number -->
+                    <div class="md:col-span-2">
                         <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
-                            Phone Number *
+                            {{ form.phone_number.label }} *
                         </label>
                         {{ form.phone_number }}
                         {% if form.phone_number.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ form.phone_number.errors.0 }}</p>
                         {% endif %}
+                        {% if form.phone_number.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.phone_number.help_text }}</p>
+                        {% endif %}
                     </div>
                     
+                    <!-- Role (only for admins) -->
+                    {% if user_role == 'ADMIN' %}
+                    <div class="md:col-span-2">
+                        <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
+                            {{ form.role.label }} *
+                        </label>
+                        {{ form.role }}
+                        {% if form.role.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.role.errors.0 }}</p>
+                        {% endif %}
+                        {% if form.role.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.role.help_text }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Password -->
                     <div>
                         <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
-                            Password *
+                            {{ form.password1.label }} *
                         </label>
                         {{ form.password1 }}
                         {% if form.password1.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ form.password1.errors.0 }}</p>
                         {% endif %}
+                        {% if form.password1.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.password1.help_text }}</p>
+                        {% endif %}
                     </div>
                     
+                    <!-- Confirm Password -->
                     <div>
                         <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-1">
-                            Confirm Password *
+                            {{ form.password2.label }} *
                         </label>
                         {{ form.password2 }}
                         {% if form.password2.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ form.password2.errors.0 }}</p>
                         {% endif %}
+                        {% if form.password2.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.password2.help_text }}</p>
+                        {% endif %}
                     </div>
                 </div>
                 
-                <!-- Hidden role field -->
-                {{ form.role }}
-                {% if form.role.errors %}
-                    <p class="mt-1 text-sm text-red-600">{{ form.role.errors.0 }}</p>
-                {% endif %}
-                
+                <!-- Action Buttons -->
                 <div class="mt-6 flex justify-end space-x-3">
-                    <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">
+                    <a href="{% url 'users:tenant_list' %}" 
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
                         Cancel
                     </a>
-                    <button type="submit" class="btn btn-orange">
-                        Add Tenant
+                    <button type="submit" 
+                            class="px-6 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Add User
                     </button>
                 </div>
             </form>

@@ -1,0 +1,141 @@
+{% extends 'users/base.html' %}
+
+{% block title %}{{ title }} - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8 dashboard-bg">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="text-3xl font-bold text-orange-900 mb-4">
+                Reserve Unit {{ unit.unit_number }}
+            </h2>
+            <p class="text-lg text-orange-700 mb-6">
+                Complete your reservation for {{ unit.property.name }}
+            </p>
+            
+            <!-- Unit Summary Card -->
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200 mb-8 max-w-2xl mx-auto">
+                <h3 class="text-xl font-bold text-orange-900 mb-4">Unit Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Unit Number:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ unit.unit_number }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Unit Type:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ unit.get_unit_type_display }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Monthly Rent:</span></p>
+                        <p class="text-lg font-semibold text-orange-600">KES {{ unit.rent_amount|floatformat:0 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Security Deposit:</span></p>
+                        <p class="text-lg font-semibold text-orange-600">KES {{ unit.deposit_amount|floatformat:0 }}</p>
+                    </div>
+                    {% if unit.floor_number %}
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Floor:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {% if unit.floor_number == 1 %}Ground Floor
+                            {% elif unit.floor_number == 2 %}1st Floor
+                            {% elif unit.floor_number == 3 %}2nd Floor
+                            {% else %}{{ unit.floor_number|add:"-1" }}rd Floor{% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                    {% if unit.floor_area %}
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Floor Area:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ unit.floor_area }} sq ft</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if unit.description %}
+                <div class="mt-4 text-left">
+                    <p class="text-sm text-gray-600"><span class="font-medium">Description:</span></p>
+                    <p class="text-gray-900">{{ unit.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Reservation Form -->
+            <form method="post" class="text-left bg-white p-6 rounded-lg shadow border border-orange-200 max-w-2xl mx-auto">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <div class="space-y-6">
+                    <!-- Move-in Date -->
+                    <div>
+                        <label for="{{ form.intended_move_in_date.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-2">
+                            {{ form.intended_move_in_date.label }} *
+                        </label>
+                        {{ form.intended_move_in_date }}
+                        {% if form.intended_move_in_date.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.intended_move_in_date.errors.0 }}</p>
+                        {% endif %}
+                        {% if form.intended_move_in_date.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.intended_move_in_date.help_text }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Additional Notes -->
+                    <div>
+                        <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-orange-800 mb-2">
+                            {{ form.notes.label }}
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.notes.errors.0 }}</p>
+                        {% endif %}
+                        {% if form.notes.help_text %}
+                            <p class="mt-1 text-xs text-orange-600">{{ form.notes.help_text }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Important Notice -->
+                <div class="mt-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-orange-800">Important Information</h3>
+                            <div class="mt-2 text-sm text-orange-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Your reservation will be valid for 24 hours</li>
+                                    <li>You must pay the security deposit to confirm your reservation</li>
+                                    <li>If payment is not completed within 24 hours, your reservation will expire</li>
+                                    <li>The security deposit is non-refundable once paid</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="mt-6 flex justify-end space-x-3">
+                    <a href="{% url 'properties:property_detail' unit.property.id %}" 
+                       class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Reserve Unit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

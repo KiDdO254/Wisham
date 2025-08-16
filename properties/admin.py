@@ -1,184 +1,118 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from unfold.admin import ModelAdmin, TabularInline
-from .models import Property, RentalUnit, PropertyImage, Amenity
+from django.urls import reverse
+from .models import Property, RentalUnit, Amenity, PropertyImage, UnitReservation
 
 
-class PropertyImageInline(TabularInline):
-    """Inline admin for property images"""
+class PropertyImageInline(admin.TabularInline):
     model = PropertyImage
     extra = 1
     fields = ['image', 'caption', 'is_primary', 'order']
-    readonly_fields = ['created_at']
 
 
-class RentalUnitInline(TabularInline):
-    """Inline admin for rental units"""
+class RentalUnitInline(admin.TabularInline):
     model = RentalUnit
-    extra = 0
-    fields = ['unit_number', 'unit_type', 'rent_amount', 'deposit_amount', 'is_available', 'current_tenant']
-    readonly_fields = ['created_at', 'updated_at']
-
-
-@admin.register(Amenity)
-class AmenityAdmin(ModelAdmin):
-    list_display = ['name', 'description', 'icon', 'created_at']
-    search_fields = ['name', 'description']
-    readonly_fields = ['created_at']
-    
-    fieldsets = (
-        ('Amenity Information', {
-            'fields': ('name', 'description', 'icon')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at',),
-            'classes': ('collapse',)
-        }),
-    )
+    extra = 1
+    fields = ['unit_number', 'unit_type', 'rent_amount', 'deposit_amount', 'is_available']
 
 
 @admin.register(Property)
-class PropertyAdmin(ModelAdmin):
-    list_display = [
-        'name', 'property_type', 'county', 'town', 'owner', 
-        'get_units_count', 'get_available_units', 'is_active', 'created_at'
-    ]
-    list_filter = [
-        'property_type', 'county', 'is_active', 'created_at', 
-        'owner', 'amenities'
-    ]
-    search_fields = ['name', 'address', 'town', 'owner__username', 'owner__email']
-    readonly_fields = ['created_at', 'updated_at']
-    filter_horizontal = ['amenities']
+class PropertyAdmin(admin.ModelAdmin):
+    list_display = ['name', 'address', 'town', 'county', 'property_type', 'is_active', 'view_property_link']
+    list_filter = ['property_type', 'county', 'town', 'is_active', 'created_at']
+    search_fields = ['name', 'address', 'town', 'county']
+    list_editable = ['is_active']
     inlines = [PropertyImageInline, RentalUnitInline]
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'property_type')
+            'fields': ('name', 'address', 'county', 'town', 'description')
         }),
-        ('Commercial Details', {
-            'fields': ('number_of_floors', 'units_per_floor'),
-            'classes': ('collapse',),
-            'description': 'Required for commercial properties only'
-        }),
-        ('Location (Kenya)', {
-            'fields': ('address', 'county', 'town')
-        }),
-        ('Management', {
-            'fields': ('owner', 'manager', 'is_active')
+        ('Property Details', {
+            'fields': ('property_type', 'number_of_floors', 'units_per_floor')
         }),
         ('Contact Information', {
             'fields': ('contact_phone', 'contact_email')
         }),
-        ('Amenities', {
-            'fields': ('amenities',)
+        ('Ownership & Management', {
+            'fields': ('owner', 'manager', 'amenities')
         }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def get_units_count(self, obj):
-        """Display total units count"""
-        return obj.get_total_units_count()
-    get_units_count.short_description = 'Total Units'
-    
-    def get_available_units(self, obj):
-        """Display available units count with color coding"""
-        available = obj.get_available_units_count()
-        total = obj.get_total_units_count()
-        
-        if total == 0:
-            color = 'gray'
-        elif available == 0:
-            color = 'red'
-        elif available < total / 2:
-            color = 'orange'
-        else:
-            color = 'green'
-            
-        return format_html(
-            '<span style="color: {};">{}/{}</span>',
-            color, available, total
-        )
-    get_available_units.short_description = 'Available/Total'
-
-
-@admin.register(PropertyImage)
-class PropertyImageAdmin(ModelAdmin):
-    list_display = ['property', 'caption', 'is_primary', 'order', 'image_preview', 'created_at']
-    list_filter = ['is_primary', 'created_at', 'property']
-    search_fields = ['property__name', 'caption']
-    readonly_fields = ['created_at', 'image_preview']
-    list_editable = ['is_primary', 'order']
-    
-    fieldsets = (
-        ('Image Information', {
-            'fields': ('property', 'image', 'image_preview', 'caption')
-        }),
-        ('Display Settings', {
-            'fields': ('is_primary', 'order')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at',),
-            'classes': ('collapse',)
+        ('Status', {
+            'fields': ('is_active',)
         }),
     )
     
-    def image_preview(self, obj):
-        """Display image preview in admin"""
-        if obj.image:
-            return format_html(
-                '<img src="{}" style="max-height: 100px; max-width: 150px;" />',
-                obj.image.url
-            )
-        return "No image"
-    image_preview.short_description = 'Preview'
+    def view_property_link(self, obj):
+        """Create a link to view the property on the frontend"""
+        if obj.id:
+            url = reverse('properties:property_detail', args=[obj.id])
+            return format_html('<a href="{}" target="_blank">View Property</a>', url)
+        return "N/A"
+    view_property_link.short_description = "Frontend Link"
 
 
 @admin.register(RentalUnit)
-class RentalUnitAdmin(ModelAdmin):
-    list_display = [
-        'unit_number', 'property', 'unit_type', 'get_rent_display', 
-        'get_deposit_display', 'is_available', 'current_tenant', 'floor_number'
-    ]
-    list_filter = [
-        'property', 'unit_type', 'is_available', 'property__county', 
-        'property__property_type', 'created_at'
-    ]
-    search_fields = [
-        'unit_number', 'property__name', 'current_tenant__username', 
-        'current_tenant__email', 'description'
-    ]
-    readonly_fields = ['created_at', 'updated_at']
+class RentalUnitAdmin(admin.ModelAdmin):
+    list_display = ['unit_number', 'property', 'unit_type', 'rent_amount', 'deposit_amount', 'is_available', 'current_tenant']
+    list_filter = ['unit_type', 'is_available', 'property__property_type', 'created_at']
+    search_fields = ['unit_number', 'property__name', 'current_tenant__username']
     list_editable = ['is_available']
     
     fieldsets = (
         ('Unit Information', {
             'fields': ('property', 'unit_number', 'unit_type', 'description')
         }),
+        ('Financial Details', {
+            'fields': ('rent_amount', 'deposit_amount')
+        }),
         ('Physical Details', {
-            'fields': ('floor_area', 'floor_number')
+            'fields': ('floor_number', 'floor_area')
         }),
-        ('Rental Details', {
-            'fields': ('rent_amount', 'deposit_amount', 'is_available')
+        ('Tenancy', {
+            'fields': ('is_available', 'current_tenant', 'lease_start_date', 'lease_end_date')
         }),
-        ('Tenancy Information', {
-            'fields': ('current_tenant', 'lease_start_date', 'lease_end_date')
+    )
+
+
+@admin.register(Amenity)
+class AmenityAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description', 'icon']
+    search_fields = ['name', 'description']
+    list_editable = ['icon']
+
+
+@admin.register(PropertyImage)
+class PropertyImageAdmin(admin.ModelAdmin):
+    list_display = ['property', 'caption', 'is_primary', 'order', 'created_at']
+    list_filter = ['is_primary', 'created_at']
+    search_fields = ['property__name', 'caption']
+    list_editable = ['is_primary', 'order']
+
+
+@admin.register(UnitReservation)
+class UnitReservationAdmin(admin.ModelAdmin):
+    list_display = ['unit', 'tenant', 'status', 'reservation_date', 'intended_move_in_date', 'security_deposit_paid']
+    list_filter = ['status', 'reservation_date', 'intended_move_in_date', 'security_deposit_paid']
+    search_fields = ['unit__unit_number', 'tenant__username', 'tenant__email', 'unit__property__name']
+    list_editable = ['status']
+    
+    fieldsets = (
+        ('Reservation Details', {
+            'fields': ('unit', 'tenant', 'status', 'reservation_date', 'intended_move_in_date')
         }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+        ('Payment Information', {
+            'fields': ('security_deposit_paid', 'payment_reference', 'payment_date')
+        }),
+        ('Timing', {
+            'fields': ('expires_at',)
+        }),
+        ('Additional Information', {
+            'fields': ('notes',)
         }),
     )
     
-    def get_rent_display(self, obj):
-        """Display formatted rent amount"""
-        return obj.get_rent_display()
-    get_rent_display.short_description = 'Monthly Rent'
+    readonly_fields = ['reservation_date', 'expires_at']
     
-    def get_deposit_display(self, obj):
-        """Display formatted deposit amount"""
-        return obj.get_deposit_display()
-    get_deposit_display.short_description = 'Security Deposit'
+    def get_queryset(self, request):
+        """Optimize queries for related fields"""
+        return super().get_queryset(request).select_related('unit', 'tenant', 'unit__property')

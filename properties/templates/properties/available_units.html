@@ -1,0 +1,279 @@
+{% extends 'users/base.html' %}
+
+{% block title %}{{ title }} - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8 dashboard-bg">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="text-3xl font-bold text-orange-900 mb-4">
+                Available Units for Reservation
+            </h2>
+            <p class="text-lg text-orange-700 mb-6">
+                Browse available units and reserve your preferred accommodation
+            </p>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <a href="{% url 'users:dashboard' %}" 
+                   class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Dashboard
+                </a>
+                
+                <a href="{% url 'payments:make_payment' %}" 
+                   class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    Make Payment
+                </a>
+            </div>
+            
+            <!-- Available Units -->
+            {% if properties_with_units %}
+            <div class="space-y-8">
+                {% for property_data in properties_with_units.values %}
+                <div class="bg-white rounded-lg shadow border border-orange-200 overflow-hidden">
+                    <!-- Property Header -->
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900">{{ property_data.property.name }}</h3>
+                                <p class="text-gray-600">{{ property_data.property.town }}, {{ property_data.property.get_county_display }}</p>
+                                <p class="text-sm text-gray-500">{{ property_data.property.get_property_type_display }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    {{ property_data.units|length }} Unit(s) Available
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if property_data.property.description %}
+                        <p class="mt-3 text-gray-700">{{ property_data.property.description|truncatewords:30 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Units Grid -->
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {% for unit in property_data.units %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h4 class="text-lg font-semibold text-gray-900">{{ unit.unit_number }}</h4>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                        {{ unit.get_unit_type_display }}
+                                    </span>
+                                </div>
+                                
+                                <div class="space-y-2 mb-4">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Monthly Rent:</span>
+                                        <span class="font-semibold text-orange-600">KES {{ unit.rent_amount|floatformat:0 }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Security Deposit:</span>
+                                        <span class="font-semibold text-orange-600">KES {{ unit.deposit_amount|floatformat:0 }}</span>
+                                    </div>
+                                    {% if unit.floor_number %}
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Floor:</span>
+                                        <span class="font-semibold text-gray-900">
+                                            {% if unit.floor_number == 1 %}Ground Floor
+                                            {% elif unit.floor_number == 2 %}1st Floor
+                                            {% elif unit.floor_number == 3 %}2nd Floor
+                                            {% else %}{{ unit.floor_number|add:"-1" }}rd Floor{% endif %}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    {% if unit.floor_area %}
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Area:</span>
+                                        <span class="font-semibold text-gray-900">{{ unit.floor_area }} sq ft</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if unit.description %}
+                                <p class="text-sm text-gray-600 mb-4">{{ unit.description|truncatewords:15 }}</p>
+                                {% endif %}
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex space-x-2">
+                                    <button onclick="openReserveModal('{{ unit.id }}', '{{ unit.unit_number }}', '{{ unit.get_unit_type_display }}', '{{ unit.rent_amount }}', '{{ unit.deposit_amount }}')"
+                                            class="flex-1 px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                        Reserve Unit
+                                    </button>
+                                    
+                                    <a href="{% url 'properties:property_detail' property_data.property.id %}" 
+                                       class="px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Summary Information -->
+            <div class="mt-8 bg-white rounded-lg shadow border border-orange-200 p-6 max-w-2xl mx-auto">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Reservation Summary</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-orange-600">
+                            {% with total_units=0 %}
+                                {% for property_data in properties_with_units.values %}
+                                    {% with total_units=total_units|add:property_data.units|length %}{% endwith %}
+                                {% endfor %}
+                                {{ total_units }}
+                            {% endwith %}
+                        </div>
+                        <div class="text-sm text-gray-600">Total Available Units</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-green-600">{{ properties_with_units|length }}</div>
+                        <div class="text-sm text-gray-600">Properties</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-blue-600">
+                            {% for property_data in properties_with_units.values %}
+                                {% for unit in property_data.units %}
+                                    {% if forloop.first %}{{ unit.get_unit_type_display }}{% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                        <div class="text-sm text-gray-600">Unit Types</div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-white rounded-lg shadow border border-orange-200 p-8 text-center">
+                <div class="text-gray-400 mb-4">
+                    <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Available Units</h3>
+                <p class="text-gray-500 mb-4">
+                    There are currently no available units for reservation. Please check back later or contact the property management.
+                </p>
+                <a href="{% url 'properties:property_list' %}" 
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700">
+                    Browse All Properties
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Unit Reservation Modal -->
+<div id="reserveModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Reserve Unit</h3>
+                <button onclick="closeReserveModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6">
+                <div class="mb-4">
+                    <h4 class="font-medium text-gray-900 mb-2">Unit Details</h4>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-600"><span class="font-medium">Unit:</span> <span id="modalUnitNumber"></span></p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Type:</span> <span id="modalUnitType"></span></p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Monthly Rent:</span> KES <span id="modalRent"></span></p>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Security Deposit:</span> KES <span id="modalDeposit"></span></p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-4">
+                        To reserve this unit, you'll need to pay the security deposit within 24 hours. 
+                        The reservation will expire if payment is not completed.
+                    </p>
+                    
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-orange-800">
+                                    <strong>Important:</strong> You must pay the security deposit to confirm your reservation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-3">
+                    <button onclick="closeReserveModal()" 
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Cancel
+                    </button>
+                    <button onclick="proceedToReservation()" 
+                            class="flex-1 px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Proceed to Reservation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Unit Reservation Modal Functionality
+let selectedUnitId = null;
+
+function openReserveModal(unitId, unitNumber, unitType, rentAmount, depositAmount) {
+    selectedUnitId = unitId;
+    document.getElementById('modalUnitNumber').textContent = unitNumber;
+    document.getElementById('modalUnitType').textContent = unitType;
+    document.getElementById('modalRent').textContent = rentAmount;
+    document.getElementById('modalDeposit').textContent = depositAmount;
+    document.getElementById('reserveModal').classList.remove('hidden');
+}
+
+function closeReserveModal() {
+    document.getElementById('reserveModal').classList.add('hidden');
+    selectedUnitId = null;
+}
+
+function proceedToReservation() {
+    if (selectedUnitId) {
+        window.location.href = `/properties/reserve-unit/${selectedUnitId}/`;
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('reserveModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeReserveModal();
+    }
+});
+
+// Close modal with escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeReserveModal();
+    }
+});
+</script>
+{% endblock %}

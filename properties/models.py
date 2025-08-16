@@ -144,6 +144,10 @@ class Property(models.Model):
     def get_total_units_count(self):
         """Return total count of rental units"""
         return self.units.count()
+    
+    def get_primary_image(self):
+        """Get the primary image for this property"""
+        return self.images.filter(is_primary=True).first()
 
 
 def property_image_upload_path(instance, filename):
@@ -273,51 +277,113 @@ class RentalUnit(models.Model):
         return f"KES {self.deposit_amount:,.2f}"
     
     def is_occupied(self):
-        """Check if unit is currently occupied"""
-        return not self.is_available and self.current_tenant is not None
+        """Check if unit is currently occupied by a tenant"""
+        return self.current_tenant is not None
     
-    def clean(self):
-        """Custom validation for commercial properties"""
-        from django.core.exceptions import ValidationError
+    def has_active_reservation(self):
+        """Check if unit has an active reservation"""
+        return self.reservations.filter(status='pending').exists()
+    
+    def can_be_reserved(self):
+        """Check if unit can be reserved (available and no active reservation)"""
+        return self.is_available and not self.is_occupied() and not self.has_active_reservation()
+    
+    def get_status_display(self):
+        """Get human-readable status of the unit"""
+        if self.is_occupied():
+            return "Occupied"
+        elif self.has_active_reservation():
+            return "Reserved"
+        elif self.is_available:
+            return "Available"
+        else:
+            return "Unavailable"
+
+
+class UnitReservation(models.Model):
+    """Model for unit reservations by tenants"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending Payment'),
+        ('paid', 'Security Deposit Paid'),
+        ('confirmed', 'Reservation Confirmed'),
+        ('cancelled', 'Cancelled'),
+        ('expired', 'Expired'),
+    ]
+    
+    unit = models.ForeignKey(RentalUnit, on_delete=models.CASCADE, related_name='reservations')
+    tenant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='unit_reservations')
+    reservation_date = models.DateTimeField(auto_now_add=True)
+    intended_move_in_date = models.DateField(help_text="When the tenant intends to move in")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Payment tracking
+    security_deposit_paid = models.BooleanField(default=False)
+    payment_reference = models.CharField(max_length=100, blank=True, help_text="Payment reference from payment system")
+    payment_date = models.DateTimeField(null=True, blank=True)
+    
+    # Reservation expiry
+    expires_at = models.DateTimeField(help_text="When the reservation expires if payment not made")
+    
+    # Additional notes
+    notes = models.TextField(blank=True, help_text="Any additional notes from tenant")
+    
+    class Meta:
+        ordering = ['-reservation_date']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['expires_at']),
+            models.Index(fields=['tenant', 'status']),
+        ]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.expires_at:
+            # Set expiry to 24 hours from reservation
+            from django.utils import timezone
+            from datetime import timedelta
+            self.expires_at = timezone.now() + timedelta(hours=24)
+    
+    def __str__(self):
+        return f"Reservation for {self.unit} by {self.tenant.get_full_name() or self.tenant.username}"
+    
+    def is_expired(self):
+        """Check if reservation has expired"""
+        from django.utils import timezone
+        return timezone.now() > self.expires_at
+    
+    def can_pay_deposit(self):
+        """Check if tenant can still pay the security deposit"""
+        return self.status == 'pending' and not self.is_expired()
+    
+    def confirm_payment(self, payment_reference):
+        """Confirm security deposit payment"""
+        from django.utils import timezone
+        self.status = 'paid'
+        self.security_deposit_paid = True
+        self.payment_reference = payment_reference
+        self.payment_date = timezone.now()
+        self.save()
         
-        if self.property.is_commercial():
-            if not self.floor_number:
-                raise ValidationError("Floor number is required for commercial properties.")
-            if self.floor_number and self.property.number_of_floors:
-                if self.floor_number > self.property.number_of_floors:
-                    raise ValidationError(f"Floor number cannot exceed the total number of floors ({self.property.number_of_floors}).")
+        # Update unit availability
+        self.unit.is_available = False
+        self.unit.save()
+    
+    def confirm_reservation(self):
+        """Confirm the reservation after payment verification"""
+        self.status = 'confirmed'
+        self.save()
+    
+    def cancel_reservation(self):
+        """Cancel the reservation"""
+        self.status = 'cancelled'
+        self.save()
+        
+        # Make unit available again
+        self.unit.is_available = True
+        self.unit.save()
     
     def save(self, *args, **kwargs):
-        """Override save to automatically update availability based on tenant status"""
-        # Update availability based on whether there's a current tenant
-        if self.current_tenant:
-            self.is_available = False
-        else:
-            self.is_available = True
-        
+        # Auto-expire expired reservations
+        if self.is_expired() and self.status == 'pending':
+            self.status = 'expired'
         super().save(*args, **kwargs)
-    
-    def get_floor_display(self):
-        """Get formatted floor display"""
-        if self.floor_number:
-            if self.floor_number == 1:
-                return "Ground Floor"
-            elif self.floor_number == 2:
-                return "1st Floor"
-            elif self.floor_number == 3:
-                return "2nd Floor"
-            else:
-                return f"{self.floor_number - 1}rd Floor"
-        return "N/A"
-    
-    def get_commercial_unit_info(self):
-        """Get commercial unit information"""
-        if self.property.is_commercial():
-            return {
-                'floor': self.get_floor_display(),
-                'floor_number': self.floor_number,
-                'total_floors': self.property.number_of_floors,
-                'units_per_floor': self.property.units_per_floor,
-                'total_units': self.property.get_total_units()
-            }
-        return None

@@ -35,6 +35,16 @@ class CustomUser(AbstractUser):
         help_text="Phone number in Kenyan format"
     )
     
+    # Track who created this user account
+    created_by = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_users',
+        help_text="User who created this account"
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

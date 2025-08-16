@@ -1,0 +1,177 @@
+{% extends 'users/base.html' %}
+
+{% block title %}{{ title }} - Wisham{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="border-4 border-dashed border-orange-200 rounded-lg p-8 dashboard-bg">
+        <div class="text-center">
+            <h1 class="wisham-title mb-4">Wisham</h1>
+            <h2 class="text-3xl font-bold text-orange-900 mb-4">
+                Pay Security Deposit
+            </h2>
+            <p class="text-lg text-orange-700 mb-6">
+                Complete your reservation for {{ reservation.unit.unit_number }}
+            </p>
+            
+            <!-- Payment Summary Card -->
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200 mb-8 max-w-2xl mx-auto">
+                <h3 class="text-xl font-bold text-orange-900 mb-4">Payment Summary</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-6">
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Unit:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ reservation.unit.unit_number }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Property:</span></p>
+                        <p class="text-lg font-semibold text-gray-900">{{ reservation.unit.property.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Monthly Rent:</span></p>
+                        <p class="text-lg font-semibold text-orange-600">KES {{ reservation.unit.rent_amount|floatformat:0 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600"><span class="font-medium">Security Deposit:</span></p>
+                        <p class="text-lg font-semibold text-orange-600">KES {{ reservation.unit.deposit_amount|floatformat:0 }}</p>
+                    </div>
+                </div>
+                
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-orange-800">Payment Required</h3>
+                            <div class="mt-2 text-sm text-orange-700">
+                                <p>Amount to pay: <strong>KES {{ reservation.unit.deposit_amount|floatformat:0 }}</strong></p>
+                                <p class="mt-1">Reference: <strong>{{ payment_data.reference }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Options -->
+            <div class="bg-white p-6 rounded-lg shadow border border-orange-200 mb-8 max-w-2xl mx-auto">
+                <h3 class="text-xl font-bold text-orange-900 mb-4">Choose Payment Method</h3>
+                
+                <!-- M-Pesa Option -->
+                <div class="border border-gray-200 rounded-lg p-4 mb-4 hover:border-orange-300 cursor-pointer">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <span class="text-green-600 font-bold text-lg">M</span>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="text-lg font-medium text-gray-900">M-Pesa</h4>
+                            <p class="text-sm text-gray-600">Pay using M-Pesa mobile money</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bank Card Option -->
+                <div class="border border-gray-200 rounded-lg p-4 mb-4 hover:border-orange-300 cursor-pointer">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="text-lg font-medium text-gray-900">Credit/Debit Card</h4>
+                            <p class="text-sm text-gray-600">Pay using Visa, Mastercard, or other cards</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bank Transfer Option -->
+                <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 cursor-pointer">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h4 class="text-lg font-medium text-gray-900">Bank Transfer</h4>
+                            <p class="text-sm text-gray-600">Pay directly from your bank account</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <a href="{% url 'properties:reservation_detail' reservation.id %}" 
+                   class="px-6 py-3 border border-gray-300 rounded-md text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    Back to Reservation
+                </a>
+                
+                <!-- For demo purposes, simulate successful payment -->
+                <button onclick="simulatePayment()" 
+                        class="px-6 py-3 border border-transparent rounded-md text-base font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                    Simulate Payment (Demo)
+                </button>
+            </div>
+            
+            <!-- Demo Notice -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 max-w-2xl mx-auto">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-gray-800">Demo Mode</h3>
+                        <div class="mt-2 text-sm text-gray-700">
+                            <p>This is a demonstration system. In production, this would integrate with actual payment gateways like M-Pesa, Stripe, or bank transfer systems.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function simulatePayment() {
+    // Simulate payment processing
+    const button = event.target;
+    const originalText = button.textContent;
+    
+    button.disabled = true;
+    button.textContent = 'Processing Payment...';
+    button.classList.add('opacity-50');
+    
+    // Simulate payment delay
+    setTimeout(() => {
+        // Redirect to success page
+        window.location.href = "{% url 'properties:payment_success' reservation.id %}?reference=DEMO_PAY_{{ reservation.id }}";
+    }, 2000);
+}
+</script>
+{% endblock %}

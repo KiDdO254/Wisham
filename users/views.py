@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
@@ -7,8 +7,11 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
+from django.http import HttpResponseForbidden
+from django.db.models import Q
 from .models import CustomUser, UserProfile, Role
-from .forms import CustomUserCreationForm, UserProfileForm, CustomAuthenticationForm
+from .forms import CustomUserCreationForm, UserProfileForm, CustomAuthenticationForm, TenantCreationForm
+from properties.models import Property, RentalUnit
 
 
 class CustomLoginView(LoginView):
@@ -146,31 +149,148 @@ def dashboard_view(request):
 
 @login_required
 def add_tenant(request):
-    """View for adding a new tenant"""
-    # Check if user has permission to add tenants
+    """Add a new tenant (admin, property manager, landlord only)"""
     if request.user.role not in [Role.ADMIN, Role.PROPERTY_MANAGER, Role.LANDLORD]:
         return HttpResponseForbidden("You don't have permission to add tenants.")
     
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        # Set the role to tenant for all added users
+        form = TenantCreationForm(request.POST, user=request.user)
         if form.is_valid():
             user = form.save(commit=False)
-            user.role = Role.TENANT
+            # Set who created this user
+            user.created_by = request.user
             user.save()
             
-            # Create user profile
-            UserProfile.objects.get_or_create(user=user)
+            # Set the creator relationship based on role
+            if request.user.role == Role.ADMIN:
+                # Admin can create any user type
+                pass
+            elif request.user.role == Role.PROPERTY_MANAGER:
+                # Property managers can only create tenants
+                if user.role != Role.TENANT:
+                    messages.error(request, 'Property managers can only create tenant accounts.')
+                    return redirect('users:add_tenant')
+            elif request.user.role == Role.LANDLORD:
+                # Landlords can only create tenants
+                if user.role != Role.TENANT:
+                    messages.error(request, 'Landlords can only create tenant accounts.')
+                    return redirect('users:add_tenant')
             
-            messages.success(request, 'Tenant added successfully!')
-            return redirect('users:dashboard')
+            messages.success(request, f'User "{user.username}" added successfully!')
+            return redirect('users:tenant_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
-        form = CustomUserCreationForm()
-        # Hide the role field since it's always tenant
-        form.fields['role'].widget = forms.HiddenInput()
-        form.fields['role'].initial = Role.TENANT
+        form = TenantCreationForm(user=request.user)
     
-    return render(request, 'users/add_tenant.html', {
+    context = {
         'form': form,
-        'title': 'Add Tenant'
-    })
+        'title': 'Add New User',
+        'user_role': request.user.role
+    }
+    
+    return render(request, 'users/add_tenant.html', context)
+
+
+@login_required
+def tenant_list(request):
+    """View list of tenants based on user permissions"""
+    if request.user.role not in [Role.ADMIN, Role.PROPERTY_MANAGER, Role.LANDLORD]:
+        return HttpResponseForbidden("You don't have permission to view tenant lists.")
+    
+    # Get tenants based on user role and permissions
+    if request.user.role == Role.ADMIN:
+        # Admin can see all users
+        tenants = CustomUser.objects.all().order_by('-created_at')
+        context_title = "All Registered Users"
+    elif request.user.role == Role.PROPERTY_MANAGER:
+        # Property managers see tenants in properties they manage
+        managed_properties = Property.objects.filter(manager=request.user)
+        tenant_ids = RentalUnit.objects.filter(
+            property__in=managed_properties
+        ).values_list('current_tenant_id', flat=True).distinct()
+        
+        # Also include tenants created by this property manager
+        tenants = CustomUser.objects.filter(
+            Q(id__in=tenant_ids) | Q(created_by=request.user)
+        ).order_by('-created_at')
+        context_title = "Tenants in Managed Properties"
+    elif request.user.role == Role.LANDLORD:
+        # Landlords see tenants in properties they own
+        owned_properties = Property.objects.filter(owner=request.user)
+        tenant_ids = RentalUnit.objects.filter(
+            property__in=owned_properties
+        ).values_list('current_tenant_id', flat=True).distinct()
+        
+        # Also include tenants created by this landlord
+        tenants = CustomUser.objects.filter(
+            Q(id__in=tenant_ids) | Q(created_by=request.user)
+        ).order_by('-created_at')
+        context_title = "Tenants in Owned Properties"
+    else:
+        tenants = CustomUser.objects.none()
+        context_title = "No Access"
+    
+    # Add additional context for each tenant
+    for tenant in tenants:
+        if tenant.role == Role.TENANT:
+            # Get current rental units for tenants
+            tenant.current_units = RentalUnit.objects.filter(current_tenant=tenant)
+            tenant.total_units = tenant.current_units.count()
+        else:
+            tenant.current_units = []
+            tenant.total_units = 0
+    
+    context = {
+        'tenants': tenants,
+        'title': context_title,
+        'user_role': request.user.role
+    }
+    
+    return render(request, 'users/tenant_list.html', context)
+
+
+@login_required
+def tenant_detail(request, tenant_id):
+    """View detailed information about a specific tenant"""
+    if request.user.role not in [Role.ADMIN, Role.PROPERTY_MANAGER, Role.LANDLORD]:
+        return HttpResponseForbidden("You don't have permission to view tenant details.")
+    
+    tenant = get_object_or_404(CustomUser, id=tenant_id)
+    
+    # Check if user has permission to view this tenant
+    can_view = False
+    if request.user.role == Role.ADMIN:
+        can_view = True
+    elif request.user.role == Role.PROPERTY_MANAGER:
+        # Check if tenant is in properties managed by this user
+        managed_properties = Property.objects.filter(manager=request.user)
+        can_view = RentalUnit.objects.filter(
+            property__in=managed_properties,
+            current_tenant=tenant
+        ).exists()
+    elif request.user.role == Role.LANDLORD:
+        # Check if tenant is in properties owned by this user
+        owned_properties = Property.objects.filter(owner=request.user)
+        can_view = RentalUnit.objects.filter(
+            property__in=owned_properties,
+            current_tenant=tenant
+        ).exists()
+    
+    if not can_view:
+        return HttpResponseForbidden("You don't have permission to view this tenant.")
+    
+    # Get tenant's current rental units
+    current_units = RentalUnit.objects.filter(current_tenant=tenant)
+    
+    # Get tenant's reservation history
+    reservations = tenant.unit_reservations.all().order_by('-reservation_date')
+    
+    context = {
+        'tenant': tenant,
+        'current_units': current_units,
+        'reservations': reservations,
+        'title': f'Tenant Details - {tenant.get_full_name()}'
+    }
+    
+    return render(request, 'users/tenant_detail.html', context)
