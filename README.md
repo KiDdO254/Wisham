@@ -98,4 +98,4 @@ Landlords near universities (e.g., Kenyatta University, University of Nairobi) m
 
 Kenyans living abroad who own rental properties locally and require transparent, real-time oversight of rent collection, occupancy status, and property condition.
 
-### **Link to Project Board**
+### **Link to Project Board**(https://github.com/users/KiDdO254/projects/2)
